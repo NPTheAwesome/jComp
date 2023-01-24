@@ -6,7 +6,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # jComp, a simple and easy to use bash script to simplify creating of java projects. 
-# Version: 0.1.1
+# Version: 0.1.2
 # Version date: Jan 20 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
@@ -54,13 +54,9 @@ function help_function {
 exit 0 # Exit script after printing help
 }
 
-function build_manifest {
-    touch $config_directory$manifest_name               # Generate new manifest file and fill in necessary manifest information
-    echo "Main-Class: ${entry_name}" >> $config_directory$manifest_name 
-    echo "Created-By: ${creator_name}" >> $config_directory$manifest_name 
-}
-
 function build_config {
+    if ! [ -z $verbose_logging ]; then
+        echo "Generating new configuration file with default values."; fi
     touch  $config_directory$config_name
     echo "[Main]" >> $config_directory$config_name
     echo "config_directory=\"./etc/\"" >> $config_directory$config_name
@@ -73,8 +69,11 @@ function build_config {
     echo "entry_name=\"source.Main\"" >> $config_directory$config_name
     echo "creator_name=\"jComp\"" >> $config_directory$config_name
     echo "executable_name=\"Main.jar\"" >> $config_directory$config_name
-    echo -e "\t\t Finished creating configuration file."
-    load_config
+
+    if ! [ -z $verbose_logging ]; then
+        echo -e "\t Finished creating configuration file."; fi
+    if ! [ -z $return_to_load ]; then
+        load_config; fi
 }
 
 function build_hello_world {
@@ -85,6 +84,20 @@ function build_hello_world {
     echo -e "\t\tSystem.out.println(\"Hello World\");" >> "./source/Main.java"
     echo -e "\t}" >> "./source/Main.java"
     echo -e "}" >> "./source/Main.java"
+}
+
+function build_manifest {
+    if test -f "$config_directory$manifest_name"; then
+        rm $config_directory$manifest_name
+    fi
+    touch $config_directory$manifest_name               # Generate new manifest file and fill in necessary manifest information
+    echo "Main-Class: ${entry_name}" >> $config_directory$manifest_name 
+    echo "Created-By: ${creator_name}" >> $config_directory$manifest_name 
+    if ! [ -z $verbose_logging ]; then
+        echo -e "Generating new manifest file."
+        echo -e "\tMain-Class is \"${entry_name}\""
+        echo -e "\tCreator is \"${creator_name}\""
+    fi 
 }
 
 function build_system {
@@ -108,13 +121,31 @@ function build_system {
         config_directory="./etc/"
         manifest_name="auto_manifest"
         entry_name="source.Main"
-        entry_name="jComp"
+        creator_name="jComp"
         build_manifest
     fi
     if ! [ -z "ls ./source/Main.java" ]; then
         build_hello_world; fi
     cd $cwd
+    echo -e "Finished building development environment.\n"
+    echo -e "Your project's entry point is \"Main.java\", located in the \"source\" directory."
+    echo -e "Your finished binary will be \"Main.jar\" located in the \"bin\" directory."
+    echo -e "Your project's configuration file is \"config\", located in the \"etc\" directory."
+    echo -e "\tFrom within \"config\" you can modify much about the program's functionality."
+    echo -e "\tTo get a better idea about jComp's configuration, visit https://github.com/NPTheAwesome/jComp"
     exit 0
+}
+
+function load_manifest {
+    if ! [ -z $verbose_logging ]; then
+        echo -e "Loading manifest file."; fi
+    if ! [ -z $para_manifest_name ]; then               # If manifest file has been specified by user        
+        if ! [ -z $verbose_logging ]; then
+            echo -e "Using user made manifest file."
+            echo -e "\tManifest file is at \"$config_directory$manifest_name\""
+        fi  
+    else                                                # Else if manifest file has not been specified by user
+        build_manifest; fi
 }
 
 function load_value {
@@ -124,7 +155,12 @@ function load_value {
 
 function load_config {
     if ! [ -z $verbose_logging ]; then
-        echo "Loading configuration data."
+        echo "Loading configuration data."; fi
+    if ! [ -d "./etc" ]; then
+        echo -e "\tConfig folder not found, bailing out."
+        echo -e "\tAre you sure the directory you are in is setup correctly?"
+        echo -e "\tIf not, try running \"jcomp -g .\"."
+        exit 1
     fi
     if test -f "$config_directory$config_name"; then 
         executable_directory=$(grep "executable_directory" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
@@ -146,7 +182,8 @@ function load_config {
             echo -e "\texecutable_name is set to \"$executable_name\""
         fi
     else
-        echo -e "\tConfiguration file not found, generating new configuration file with default values."
+        echo -e "\tConfiguration file not found."
+        return_to_load="TRUE"
         build_config
     fi
     echo -e "Finished loading configuration data.\n"
@@ -154,8 +191,7 @@ function load_config {
 
 function load_parameters {
     if ! [ -z $verbose_logging ]; then
-        echo "Loading user parameters."
-    fi
+        echo "Loading user parameters."; fi
     if ! [ -z $para_source_directories_string ]; then
         source_directories_string=$para_source_directories_string;
         if ! [ -z $verbose_logging ]; then
@@ -192,8 +228,7 @@ function load {
 
 function split {
     if ! [ -z $verbose_logging ]; then
-        echo "Finding source directories."
-    fi
+        echo "Finding source directories."; fi
     IFS=,                                               # Set character to split string on to ','
     for i in $source_directories_string; do             # For each string created after spliting
         temp=$i                                         # Copy string to temp
@@ -211,42 +246,23 @@ function split {
 function compile {
 
     if ! [ -z $verbose_logging ]; then
-        echo -e "Compiling and packaging code.\nHandling manifest."
-    fi
-    if [ -z $custom_manifest ]; then                    # If manifest file has not been specified by user
-        if test -f "$config_directory$manifest_name"; then
-            rm $config_directory$manifest_name
-        fi
-        build_manifest
-        if ! [ -z $verbose_logging ]; then
-            echo "Generating new manifest file."
-            echo -e "\tMain-Class is \"${entry_name}\""
-            echo -e "\tCreator is \"${creator_name}\""
-        fi
-    else                                                # Else if manifest file has been specified by user
-        if ! [ -z $verbose_logging ]; then
-            echo "Using user made manifest file."
-            echo -e "\tManifest file is at \"$config_directory${manifest_name}\""
-        fi                                             
-    fi
+        echo -e "Compiling and packaging code."; fi
+    load_manifest
     if ! [ -z $verbose_logging ]; then
-        echo "Compiling source files."
-    fi
+        echo -e "Compiling source files."; fi
     for dir in ${source_directories[@]}; do
         if ! [ -z $verbose_logging ]; then
-            echo -e "\tScanning \"$dir\""
-        fi     
+            echo -e "\tScanning \"$dir\""; fi     
         for file in $dir*.java; do                      # For all specified source code directories
             javac -d $class_directory $file             # Compile source code to classes directory
             if ! [ -z $verbose_logging ]; then
-                echo -e "\t\tCompiling \"$file\""
-            fi
+                echo -e "\t\tCompiling \"$file\""; fi
         done
     done   
     cwd=$(pwd)/
     cd $class_directory
     if ! [ -z $verbose_logging ]; then                  # Package all class files together
-        echo "Packaging code into \"$executable_directory$executable_name\""
+        echo -e "Packaging code into \"$executable_directory$executable_name\""
         jar cvfm $cwd$executable_directory$executable_name $cwd$config_directory$manifest_name */*.class 
     else
         jar cfm $cwd$executable_directory$executable_name $cwd$config_directory$manifest_name */*.class 
@@ -257,18 +273,15 @@ function compile {
 
 function clean_classes {
     if ! [ -z $verbose_logging ]; then
-        echo -e "Cleaning up .class files"
-    fi
+        echo -e "Cleaning up .class files"; fi
     for dir in $class_directory*; do                    # For each class directory
         if ! [ -z $verbose_logging ]; then
-            echo -e "\tScanning \"$dir\""
-        fi
+            echo -e "\tScanning \"$dir\""; fi
         if ! [ -z "ls $dir" ]; then                     # If directory isn't empty
             for file in $dir/*.class; do
                 if test -f "$file"; then
                     if ! [ -z $verbose_logging ]; then
-                        echo -e "\t\tRemoving \"$file\""
-                    fi
+                        echo -e "\t\tRemoving \"$file\""; fi
                     rm $file                            # Remove class file
                 fi
             done
@@ -279,12 +292,10 @@ function clean_classes {
 function pre_clean {
     clean_classes                                       # Remove class files
     if ! [ -z $verbose_logging ]; then
-        echo -e "Cleaning up .jar file."
-    fi
+        echo -e "Cleaning up .jar file."; fi
     if test -f "$executable_directory$executable_name"; then
         if ! [ -z $verbose_logging ]; then
-            echo -e "\tRemoving \"$executable_directory$executable_name\""
-        fi                    
+            echo -e "\tRemoving \"$executable_directory$executable_name\""; fi                    
         rm $executable_directory$executable_name        # Remove jar file
     fi
     echo -e "Pre-Cleaning completed.\n"
@@ -292,15 +303,13 @@ function pre_clean {
 
 function temporary {
     if ! [ -z $verbose_logging ]; then
-        echo -e "Temporarily running \"$executable_directory$executable_name\"\n"
-    fi
+        echo -e "Temporarily running \"$executable_directory$executable_name\"\n"; fi
     java -jar $executable_directory$executable_name     # Run jar file
     echo -e "Program exited." 
     clean_classes                                       # Remove class files
     if test -f "$executable_directory$executable_name"; then
         if ! [ -z $verbose_logging ]; then
-            echo -e "\tRemoving \"$executable_directory$executable_name\""
-        fi  
+            echo -e "\tRemoving \"$executable_directory$executable_name\""; fi  
         rm $executable_directory$executable_name        # Remove jar file
     fi
     echo -e "Post-Cleaning completed.\n"
@@ -309,8 +318,7 @@ function temporary {
 
 function main {
     if ! [ -z $need_help ]; then                        # If -h flag is passed, run help function and exit
-        help_function
-    fi
+        help_function; fi
 
     load
 
@@ -319,8 +327,7 @@ function main {
     compile                                             # Compile source code into binaries
 
     if ! [ -z $temporary ]; then                        # If -t flag is passed, run temporary function and exit
-        temporary
-    fi
+        temporary; fi
     if ! [ -z $run ]; then                              # If -r flag is passed, run jar file 
         echo -e "Running \"$executable_directory$executable_name\"\n"
         java -jar $executable_directory$executable_name
@@ -332,8 +339,9 @@ function main {
     fi
 }
 
-while getopts "g:s:i:m:e:b:d:o:hrctv" opt; do
+while getopts " g:s:i:m:e:b:d:o:hrctv" opt; do
     case "$opt" in
+        v ) verbose_logging="TRUE" ;;
         g ) build_system $OPTARG ;;
         s ) config_directory="$OPTARG" ;;
         i ) config_name=$OPTARG ;;
@@ -346,7 +354,6 @@ while getopts "g:s:i:m:e:b:d:o:hrctv" opt; do
         r ) run="TRUE" ;;
         c ) post_cleaning="TRUE" ;;
         t ) temporary="TRUE" ;;
-        v ) verbose_logging="TRUE" ;;
         ? ) echo -e "You entered an illegal flag, we'll show you the help page now.\n"
             help_function ;;
     esac
