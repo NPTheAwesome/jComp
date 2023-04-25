@@ -6,7 +6,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # jComp, a simple and easy to use bash script to simplify creating of java projects. 
-# Version: 0.1.3
+# Version: 0.1.4
 # Version date: Apr 25 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
@@ -262,7 +262,7 @@ function make_shell_script {
     touch "app_$basename.sh"
     echo "java -jar $executable_directory/$executable_name" >> "app_$basename.sh"
     chmod +x "app_$basename.sh"
-    echo -e "created launch script, \"app_$basename.sh\"."
+    echo -e "Creating launch script, \"app_$basename.sh\" completed.\n"
 }
 
 function compile {
@@ -328,15 +328,17 @@ function temporary {
     if ! [ -z $verbose_logging ]; then
         echo -e "Temporarily running \"$executable_directory$executable_name\"\n"; fi
     java -jar $executable_directory$executable_name     # Run jar file
-    echo -e "Program exited." 
+    echo -e "\nProgram exited." 
     clean_classes                                       # Remove class files
     if test -f "$executable_directory$executable_name"; then
         if ! [ -z $verbose_logging ]; then
             echo -e "\tRemoving \"$executable_directory$executable_name\""; fi  
         rm $executable_directory$executable_name        # Remove jar file
-        rm "application_$executable_name.sh"            # Remove launch script
+        if ! [ -z $verbose_logging ]; then
+            echo -e "\tRemoving \"./app_${executable_name%.*}.sh\""; fi  
+        rm "app_${executable_name%.*}.sh"            # Remove launch script
     fi
-    echo -e "Post-Cleaning completed.\n"
+    echo -e "\nPost-Cleaning completed."
     exit 1                                              # Exit script
 }
 
