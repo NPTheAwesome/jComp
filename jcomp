@@ -6,8 +6,8 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # jComp, a simple and easy to use bash script to simplify creating of java projects. 
-# Version: 0.1.2
-# Version date: Jan 20 2023
+# Version: 0.1.3
+# Version date: Apr 25 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
 
@@ -25,7 +25,7 @@ executable_name=""
 function help_function {
     echo "jComp: A script by Noah Panepinto used to simplify the compilation of java code."
     echo -e "Usage: jcomp:\n\t-g Generate project | -s Configuration Directory | -i Config Path | -m Manifest Path | -e Entry Point | -b Creator Credit | -d Source Directories | -o Output Name\n\t-h Help  | -r Run | -c Clean | -t Temporary | -v Verbose\n"
-    echo -e "\t-g Generate project, directories, configuration files, and hello world program, (Ignores all others)"
+    echo -e "\t-g Generate project, git repository (if git is installed), directories, configuration files, and hello world program, (Ignores all others)"
     echo -e "\t-s Select configuration directory"
     echo -e "\t-i Select config file name"
     echo -e "\t-m Select existing manifest file (Ignores -e and -b)"
@@ -52,6 +52,19 @@ function help_function {
         echo -e "\t\tDefault class directory is \"./classes/\""
     fi
 exit 0 # Exit script after printing help
+}
+
+function git_init {
+    if which git >/dev/null; then
+        touch .gitignore
+        echo ".class" >> ".gitignore"
+        echo ".jar" >> ".gitignore"
+        echo ".sh" >> ".gitignore"
+        git init
+        git add .
+        git commit
+    else
+        echo git not installed, couldn\'t create git repo.; fi
 }
 
 function build_config {
@@ -101,8 +114,9 @@ function build_manifest {
 }
 
 function build_system {
-    cwd=$(pwd)
-    cd $1
+    if ! [ -d "$1" ]; then
+        mkdir "$1"; fi
+    cd "$1"
     if ! [ -d "./bin" ]; then
         mkdir "./bin"; fi
     if ! [ -d "./classes" ]; then
@@ -126,7 +140,7 @@ function build_system {
     fi
     if ! [ -z "ls ./source/Main.java" ]; then
         build_hello_world; fi
-    cd $cwd
+    git_init
     echo -e "Finished building development environment.\n"
     echo -e "Your project's entry point is \"Main.java\", located in the \"source\" directory."
     echo -e "Your finished binary will be \"Main.jar\" located in the \"bin\" directory."
@@ -243,6 +257,14 @@ function split {
     echo -e "Finding source directories completed.\n"
 }
 
+function make_shell_script {
+    basename="${executable_name%.*}"
+    touch "app_$basename.sh"
+    echo "java -jar $executable_directory/$executable_name" >> "app_$basename.sh"
+    chmod +x "app_$basename.sh"
+    echo -e "created launch script, \"app_$basename.sh\"."
+}
+
 function compile {
 
     if ! [ -z $verbose_logging ]; then
@@ -269,6 +291,7 @@ function compile {
     fi                                                
     cd $cwd
     echo -e "Compilation completed.\n"
+    make_shell_script
 }
 
 function clean_classes {
@@ -311,6 +334,7 @@ function temporary {
         if ! [ -z $verbose_logging ]; then
             echo -e "\tRemoving \"$executable_directory$executable_name\""; fi  
         rm $executable_directory$executable_name        # Remove jar file
+        rm "application_$executable_name.sh"            # Remove launch script
     fi
     echo -e "Post-Cleaning completed.\n"
     exit 1                                              # Exit script
