@@ -1,0 +1,4 @@
+#!/bin/bash
+chmod +x ./jcomp
+cp ./jcomp /bin/bash
+echo -e "jComp installed, please use \"jcomp -h\" to see help."
