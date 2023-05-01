@@ -1,7 +1,7 @@
 # jComp
 
 A simple and easy to use bash script to simplify creating of java projects.
-Currently on Alpha version number 0.2.1
+Currently on Alpha version number 0.2.2
 
 ## Installation and Dependencies
 
@@ -139,6 +139,6 @@ Each project has a config file located at etc/config which controls several impo
 * manifest_name; the name of the manifest file to be loaded from the config directory, by default this is "auto_manifest"
 * entry_name; the name of the source file to use as an entry point for the program, in the format of `package.File`, by default this is "source.Main"
 * creator_name; the name of the project's creator to be credited in the manifest file, by default this is "jComp"
-* executable_name; the name of the application to be compiled to, by default this is "Main.jar"
+* executable_name; the name of the application to be compiled to, by default this is the name of the project with .jar following.
 
 Documentation last modified May 1st 2023.

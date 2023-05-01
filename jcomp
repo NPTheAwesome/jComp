@@ -6,7 +6,7 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # jComp, a simple and easy to use bash script to simplify creating of java projects. 
-# Version: 0.2.1
+# Version: 0.2.2
 # Version date: May 01 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
@@ -121,7 +121,7 @@ function build_config {
     echo "manifest_name=\"auto_manifest\"" >> $config_directory$config_name
     echo "entry_name=\"source.Main\"" >> $config_directory$config_name
     echo "creator_name=\"jComp\"" >> $config_directory$config_name
-    echo "executable_name=\"$1.jar\"" >> $config_directory$config_name
+    echo "executable_name=\"$executable_name\"" >> $config_directory$config_name
 
     if ! [ -z $verbose_logging ]; then
         echo -e "\t Finished creating configuration file."; fi
@@ -167,6 +167,7 @@ function build_system {
     if ! [ -z "ls ./etc/config" ]; then
         config_directory="./etc/"
         config_name="config"
+        executable_name="$1.jar"
         build_config
     fi
     # If the manifest file does not exist, make it.
@@ -215,12 +216,6 @@ function load_manifest {
     # Else if manifest file has not been specified by user, create it.
     else
         build_manifest; fi
-}
-
-# Function to seperate a single XML entry into key and value, and return the value.
-function load_value {
-    $value=$(grep "$1" "$2" | sed 's/ *= */=/g' | grep -o '".*"' | sed 's/"//g')
-    echo -e "$value"
 }
 
 # Function to load config file and all parameters stored within.
