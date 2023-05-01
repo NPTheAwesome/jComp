@@ -1,7 +1,7 @@
 # jComp
 
 A simple and easy to use bash script to simplify creating of java projects.
-Currently on Alpha version number 0.2.0
+Currently on Alpha version number 0.2.1
 
 ## Installation and Dependencies
 
@@ -12,7 +12,19 @@ The application depends on the following packages.
 * sed
 * GIT (optional, but suggested)
 
-To install the script on a linux system, clone the repository and run the install.sh script.
+To install the script on a linux system, clone the repository and run the install.sh script. 
+
+```
+./install
+```
+
+By default the install script will attempt to put the jcomp script in /usr/bin, if however you would like to install jcomp at a different location pass the desire directory to the install script.
+
+```
+./install /bin
+```
+
+Remember to install as root if needed.
 
 ## Use and Flags
 
@@ -129,4 +141,4 @@ Each project has a config file located at etc/config which controls several impo
 * creator_name; the name of the project's creator to be credited in the manifest file, by default this is "jComp"
 * executable_name; the name of the application to be compiled to, by default this is "Main.jar"
 
-Documentation last modified April 29th 2023.
+Documentation last modified May 1st 2023.
