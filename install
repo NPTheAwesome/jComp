@@ -1,4 +1,31 @@
 #!/bin/bash
-chmod +x ./jcomp
-cp ./jcomp /bin/bash
-echo -e "jComp installed, please use \"jcomp -h\" to see help."
+
+# Copyright 2023 Noah Panepinto
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+# jComp Installer, the install script for jComp. 
+# Version: 0.2.1
+# Version date: May 01 2023
+# Initially created by: Noah Panepinto
+# Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
+
+# Save the desired installation directory to out_dir, if the user passes no argument to the script out_dir will be "/usr/bin".
+out_dir="/usr/bin"
+if ! [ $# -eq 0 ]; then
+    out_dir="$1"; fi
+echo -e "Attempting to install jComp at $out_dir."
+# Attempt to make the jcomp script executable, if this fails, display error 1 message and exit code 1.
+chmod +x ./jcomp  || {
+    echo -e "There was an error while jComp attempted to install:\n\tError 1."
+    exit 1
+}
+# Attempt to copy the jcomp script to out_dir, if this fails, display error 2 message and exit code 2.
+cp ./jcomp $out_dir || {
+    echo -e "There was an error while jComp attempted to install:\n\tError 2."
+    exit 2
+}
+# Announce successful completion of installation, and exit code 0.
+echo -e "jComp installed at $out_dir, please use \"jcomp -h\" to see help."
+exit 0
