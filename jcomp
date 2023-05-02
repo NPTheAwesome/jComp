@@ -6,16 +6,16 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # jComp, a simple and easy to use bash script to simplify creating of java projects. 
-# Version: 0.2.2
-# Version date: May 01 2023
+# Version: 0.2.3
+# Version date: May 02 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
 
 # Default values for operation, config_directory and config_name are set by default, and currently be
     # modified in a configuration file. executable_directory, source_directories_string, class_directory,
-    # manifest_name, entry_name, creator_name, and executable_name are all loaded from the config files.
-    # These parameters can also be changed by using flags at calltime, for information about what flags to
-    # use check the help function.
+    # manifest_name, entry_name, creator_name, executable_name, and launch_prefix are all loaded from the 
+    # config files. These parameters can also be changed by using flags at calltime, for information about 
+    # what flags to use check the help function.
 config_directory="./etc/"
 config_name="config"
 
@@ -27,6 +27,7 @@ manifest_name=""
 entry_name=""
 creator_name=""
 executable_name=""
+launch_prefix=""
 
 # Help function, called by passing the -h flag at runtime, it explains how to use jComp, more specifically
     # how to use each of the flags, and when used in combination with the -v verbose flag, shows the
@@ -61,9 +62,10 @@ function help_function {
         echo -e "\t\tDefault entry point name is \"source.Main\""
         echo -e "\t\tDefault creator name is \"jComp\""
         echo -e "\t\tDefault executable directory is \"./bin/\""
-        echo -e "\t\tDefault executable name is \"Main.jar\""
+        echo -e "\t\tDefault executable name is your project title followed by \".jar\""
         echo -e "\t\tDefault source directory is \"./source/\""
         echo -e "\t\tDefault class directory is \"./classes/\""
+        echo -e "\t\tDefault launch script prefix is \"app_\""
     fi
     # Exit Succesfully.
     exit 0 
@@ -122,9 +124,10 @@ function build_config {
     echo "entry_name=\"source.Main\"" >> $config_directory$config_name
     echo "creator_name=\"jComp\"" >> $config_directory$config_name
     echo "executable_name=\"$executable_name\"" >> $config_directory$config_name
+    echo "launch_prefix=\"app_\"" >> $config_directory$config_name
 
     if ! [ -z $verbose_logging ]; then
-        echo -e "\t Finished creating configuration file."; fi
+        echo -e "\tFinished creating configuration file."; fi
     # If this function was called by load_config, return to the begining of load_config.
     if ! [ -z $return_to_load ]; then
         load_config; fi
@@ -197,10 +200,12 @@ function build_system {
 # Create a shell script that runs the jar file.
 function build_shell_script {
     basename="${executable_name%.*}"
-    touch "app_$basename.sh"
-    echo "java -jar $executable_directory/$executable_name" >> "app_$basename.sh"
-    chmod +x "app_$basename.sh"
-    echo -e "Creating launch script, \"app_$basename.sh\" completed.\n"
+    if test -f "$launch_prefix$basename.sh"; then
+        rm "$launch_prefix$basename.sh"; fi
+    touch "$launch_prefix$basename.sh"
+    echo "java -jar $executable_directory$executable_name" >> "$launch_prefix$basename.sh"
+    chmod +x "$launch_prefix$basename.sh"
+    echo -e "Creating launch script, \"$launch_prefix$basename.sh\" completed.\n"
 }
 
 # Load the manifest file.
@@ -210,12 +215,26 @@ function load_manifest {
     # If manifest file has been specified by user, load it.
     if ! [ -z $para_manifest_name ]; then
         if ! [ -z $verbose_logging ]; then
-            echo -e "Using user made manifest file."
+            echo -e "Using user specified manifest file."
             echo -e "\tManifest file is at \"$config_directory$manifest_name\""
         fi  
-    # Else if manifest file has not been specified by user, create it.
+    # Else if manifest file has not been specified by user, check if creator_name or entry_name is overwritten.
     else
-        build_manifest; fi
+        if ! [ -z $para_creator_name ] || ! [ -z $para_entry_name ]; then
+            # If so, update parameters and build a new manifest.
+            if ! [ -z $para_creator_name ]; then
+                creator_name=$para_creator_name; fi
+            if ! [ -z $para_entry_name ]; then
+                entry_name=$para_entry_name; fi
+            build_manifest
+        # Else use manifest specifiec in the config file.
+        else
+            if ! [ -z $verbose_logging ]; then
+                echo -e "Using default manifest file."
+                echo -e "\tManifest file is at \"$config_directory$manifest_name\""
+            fi 
+        fi
+    fi
 }
 
 # Function to load config file and all parameters stored within.
@@ -240,6 +259,7 @@ function load_config {
         entry_name=$(grep "entry_name" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         creator_name=$(grep "creator_name" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         executable_name=$(grep "executable_name" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
+        launch_prefix=$(grep "launch_prefix" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         # If verbose_logging is enabled print loaded values.
         if ! [ -z $verbose_logging ]; then   
             echo -e "\texecutable_directory is set to \"$executable_directory\""
@@ -250,6 +270,7 @@ function load_config {
             echo -e "\tentry_name is set to \"$entry_name\""
             echo -e "\tcreator_name is set to \"$creator_name\""
             echo -e "\texecutable_name is set to \"$executable_name\""
+            echo -e "\tlaunch_prefix is set to \"$launch_prefix\""
         fi
     # Else make a new config file.
     else
@@ -265,27 +286,27 @@ function load_parameters {
     if ! [ -z $verbose_logging ]; then
         echo "Loading user parameters."; fi
     # If the user overwrites the sources string, replace it.
-    if ! [ -z $para_source_directories_string ]; then
+    if ! [[ -z $para_source_directories_string ]]; then
         source_directories_string=$para_source_directories_string;
         if ! [ -z $verbose_logging ]; then
             echo -e "\tsource_directories_string is overridden to \"$source_directories_string\""; fi fi
     # If the user overwrites the manifest name, replace it.
-    if ! [ -z $para_manifest_name ]; then
+    if ! [[ -z $para_manifest_name ]]; then
         manifest_name=$para_manifest_name
         if ! [ -z $verbose_logging ]; then
             echo -e "\tmanifest_name is overridden to \"$manifest_name\""; fi fi
     # If the user overwrites the entry name, replace it.
-    if ! [ -z $para_entry_name ]; then
+    if ! [[ -z $para_entry_name ]]; then
         entry_name=$para_entry_name;
         if ! [ -z $verbose_logging ]; then
             echo -e "\tentry_name is overridden to \"$entry_name\""; fi fi
     # If the user overwrites the creator name, replace it.
-    if ! [ -z $para_creator_name ]; then
+    if ! [[ -z $para_creator_name ]]; then
         creator_name=$para_creator_name;
         if ! [ -z $verbose_logging ]; then
             echo -e "\tcreator_name is overridden to \"$creator_name\""; fi fi
     # If the user overwrites the executable name, replace it.
-    if ! [ -z $para_executable_name ]; then
+    if ! [[ -z $para_executable_name ]]; then
         executable_name=$para_executable_name;
         if ! [ -z $verbose_logging ]; then
             echo -e "\texecutable_name is overridden to \"$executable_name\""; fi fi
@@ -438,8 +459,10 @@ while getopts " g:s:i:m:e:b:d:o:hrctv" opt; do
         s ) config_directory="$OPTARG" ;;
         i ) config_name=$OPTARG ;;
         m ) para_manifest_name="$OPTARG" ;;  
-        e ) para_entry_name="$OPTARG" ;;
-        b ) para_creator_name="$OPTARG" ;;
+        e ) para_entry_name="$OPTARG"
+            make_manifest="TRUE" ;;
+        b ) para_creator_name="$OPTARG"
+            make_manifest="TRUE" ;;
         d ) para_source_directories_string="$OPTARG" ;;
         o ) para_executable_name="$OPTARG" ;;
         h ) need_help="TRUE" ;;
