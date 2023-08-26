@@ -6,25 +6,59 @@
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 # jComp Installer, the install script for jComp. 
-# Version: 0.2.3
-# Version date: May 02 2023
+# Version: 0.2.5
+# Version date: Aug 26 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
+
+# Check if required dependancies are installed, if so, proceed with installation, if not advise 
+    # installing dependancies.
+function check_dependancies {
+    dependancy_failure=""
+    # Check if java is installed and fail if not.    
+    if ! which javac >/dev/null; then
+        dependancy_failure="TRUE"
+        echo -e "Java Development Kit (JDK), a necessary dependancy, is not installed."
+    fi
+    # Check if sed is installed and fail if not.
+    if ! which sed >/dev/null; then
+        dependancy_failure="TRUE"
+        echo -e "GNU Stream Editor (SED), a necessary dependancy, is not installed."
+    fi
+    # Check if grep is installed and fail if not.
+    if ! which grep >/dev/null; then
+        dependancy_failure="TRUE"
+        echo -e "GNU Grep, a necessary dependancy, is not installed."
+    fi
+    # Check if git is installed, if not advise installing dependancies.
+    if ! which git >/dev/null; then
+        echo -e "GIT, a suggested dependancy, is not installed."
+        echo -e "The installation process will proceed so long as no other errors are found./nYou are advised to install it if you intend to use git with your jComp projects."
+    fi
+    # If a necessary dependancy is not found then display an error to the user and exit.
+    if ! [ -z $dependancy_failure ]; then
+        echo -e "At least one necessary dependancy is not installed on the system, please fix this before attempting to install jComp again."
+        # Display error 1 message and exit code 1.
+        echo -e "There was an error while jComp attempted to install:\n\tError 1."
+        exit 1
+    fi
+}
 
 # Save the desired installation directory to out_dir, if the user passes no argument to the script out_dir will be "/usr/bin".
 out_dir="/usr/bin"
 if ! [ $# -eq 0 ]; then
     out_dir="$1"; fi
 echo -e "Attempting to install jComp at $out_dir."
-# Attempt to make the jcomp script executable, if this fails, display error 1 message and exit code 1.
+check_dependancies
+# Attempt to make the jcomp script executable, if this fails, display error 2 message and exit code 2.
 chmod +x ./jcomp  || {
-    echo -e "There was an error while jComp attempted to install:\n\tError 1."
-    exit 1
-}
-# Attempt to copy the jcomp script to out_dir, if this fails, display error 2 message and exit code 2.
-cp ./jcomp $out_dir || {
     echo -e "There was an error while jComp attempted to install:\n\tError 2."
     exit 2
+}
+# Attempt to copy the jcomp script to out_dir, if this fails, display error 3 message and exit code 3.
+cp ./jcomp $out_dir || {
+    echo -e "There was an error while jComp attempted to install:\n\tError 3."
+    exit 3
 }
 # Announce successful completion of installation, and exit code 0.
 echo -e "jComp installed at $out_dir, please use \"jcomp -h\" to see help."

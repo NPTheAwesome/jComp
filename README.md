@@ -1,7 +1,7 @@
 # jComp
 
 A simple and easy to use bash script to simplify creating of java projects.
-Currently on Alpha version number 0.2.3
+Currently on Alpha version number 0.2.5 and licensed under the MIT License.
 
 ## Installation and Dependencies
 
@@ -12,7 +12,7 @@ The application depends on the following packages.
 * sed
 * GIT (optional, but suggested)
 
-To install the script on a linux system, clone the repository and run the install.sh script. 
+To install the script on a linux system, clone the repository and run the install.sh script.
 
 ```
 ./install
@@ -30,7 +30,7 @@ Remember to install as root if needed.
 
 ### Creating a Project
 
-In order to make a new project, navigate to the directry you would like to plaace your project in, and run jcomp using the -g flag passing the name of your project. If a sub directory with the name you passed does not exist it will be created. A brand new project will built up inside of the new project directory. For example:
+In order to make a new project, navigate to the directry you would like to place your project in, and run jcomp using the -g flag passing the name of your project. If a sub directory with the name you passed does not exist it will be created. A brand new project will built up inside of the new project directory. For example:
 
 ```
 jcomp -g ProjectName
@@ -142,4 +142,4 @@ Each project has a config file located at etc/config which controls several impo
 * executable_name; the name of the application to be compiled to, by default this is the name of the project with .jar following, so if your project was called "white_elephant" the executable name would be "white_elphant.jar" by default.
 * launch_prefix; the prefix added to the executable name for the launch script created when compiling, by default this is "app_". if your project was called "white_elephant" the name of the launch script would be "app_white_elephant.sh" by default.
 
-Documentation last modified May 2nd 2023.
+Documentation last modified Aug 26nd 2023.
