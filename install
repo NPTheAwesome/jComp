@@ -5,17 +5,17 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# jComp Installer, the install script for jComp. 
-# Version: 0.2.5
-# Version date: Aug 26 2023
+# jComp Installer, the install script for jComp.
+# Version: 0.2.6
+# Version date: sep 13 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
 
-# Check if required dependancies are installed, if so, proceed with installation, if not advise 
+# Check if required dependancies are installed, if so, proceed with installation, if not advise
     # installing dependancies.
 function check_dependancies {
     dependancy_failure=""
-    # Check if java is installed and fail if not.    
+    # Check if java is installed and fail if not.
     if ! which javac >/dev/null; then
         dependancy_failure="TRUE"
         echo -e "Java Development Kit (JDK), a necessary dependancy, is not installed."

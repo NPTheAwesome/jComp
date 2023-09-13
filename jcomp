@@ -5,16 +5,16 @@
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-# jComp, a simple and easy to use bash script to simplify creating of java projects. 
-# Version: 0.2.5
-# Version date: Aug 26 2023
+# jComp, a simple and easy to use bash script to simplify creating of java projects.
+# Version: 0.2.6
+# Version date: Sep 13 2023
 # Initially created by: Noah Panepinto
 # Currently maintained by: Noah Panepinto (noah.ryan.panepinto@gmail.com)
 
 # Default values for operation, config_directory and config_name are set by default, and currently be
     # modified in a configuration file. executable_directory, source_directories_string, class_directory,
-    # manifest_name, entry_name, creator_name, executable_name, and launch_prefix are all loaded from the 
-    # config files. These parameters can also be changed by using flags at calltime, for information about 
+    # manifest_name, entry_name, creator_name, executable_name, and launch_prefix are all loaded from the
+    # config files. These parameters can also be changed by using flags at calltime, for information about
     # what flags to use check the help function.
 config_directory="./etc/"
 config_name="config"
@@ -22,7 +22,7 @@ config_name="config"
 executable_directory=""
 source_directories_string=""
 class_directory=""
-        
+
 manifest_name=""
 entry_name=""
 creator_name=""
@@ -51,7 +51,7 @@ function help_function {
     echo -e "\t-t Run jar file then delete all files created (Ignores -r and -c)"
     # If verbose_logging mode is not enabled, inform the user they can use the help function with verbose
         # logging to see additional information about the default values of each parameter.
-    if [ -z $verbose_logging ]; then   
+    if [ -z $verbose_logging ]; then
         echo -e "\t-v Print more detailed logging information (use in combination with -h to see detailed info about default behaviour)"
     # Else print each of the default values.
     else
@@ -141,13 +141,13 @@ function build_manifest {
     fi
     # Generate new manifest file and fill in necessary manifest information.
     touch $config_directory$manifest_name
-    echo "Main-Class: ${entry_name}" >> $config_directory$manifest_name 
-    echo "Created-By: ${creator_name}" >> $config_directory$manifest_name 
+    echo "Main-Class: ${entry_name}" >> $config_directory$manifest_name
+    echo "Created-By: ${creator_name}" >> $config_directory$manifest_name
     if ! [ -z $verbose_logging ]; then
         echo -e "Generating new manifest file."
         echo -e "\tMain-Class is \"${entry_name}\""
         echo -e "\tCreator is \"${creator_name}\""
-    fi 
+    fi
 }
 
 # Create the directory tree for a new project.
@@ -192,7 +192,7 @@ function build_system {
     echo -e "Your finished binary will be \"Main.jar\" located in the \"bin\" directory."
     echo -e "Your project's configuration file is \"config\", located in the \"etc\" directory."
     echo -e "\tFrom within \"config\" you can modify much about the program's functionality."
-    echo -e "\tTo get a better idea about jComp's configuration, visit https://github.com/NPTheAwesome/jComp"
+    echo -e "\tTo get a better idea about jComp's configuration, visit https://github.com/P0TAT0B0T/jComp"
     # Leave succesfuly.
     exit 0
 }
@@ -217,7 +217,7 @@ function load_manifest {
         if ! [ -z $verbose_logging ]; then
             echo -e "Using user specified manifest file."
             echo -e "\tManifest file is at \"$config_directory$manifest_name\""
-        fi  
+        fi
     # Else if manifest file has not been specified by user, check if creator_name or entry_name is overwritten.
     else
         if ! [ -z $para_creator_name ] || ! [ -z $para_entry_name ]; then
@@ -232,7 +232,7 @@ function load_manifest {
             if ! [ -z $verbose_logging ]; then
                 echo -e "Using default manifest file."
                 echo -e "\tManifest file is at \"$config_directory$manifest_name\""
-            fi 
+            fi
         fi
     fi
 }
@@ -250,18 +250,18 @@ function load_config {
         exit 1
     fi
     # If the config file exists, load the values in.
-    if test -f "$config_directory$config_name"; then 
+    if test -f "$config_directory$config_name"; then
         executable_directory=$(grep "executable_directory" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         source_directories_string=$(grep "source_directories_string" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         class_directory=$(grep "class_directory" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
-        
+
         manifest_name=$(grep "manifest_name" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         entry_name=$(grep "entry_name" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         creator_name=$(grep "creator_name" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         executable_name=$(grep "executable_name" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         launch_prefix=$(grep "launch_prefix" "$config_directory$config_name" | grep -o '".*"' | sed 's/"//g')
         # If verbose_logging is enabled print loaded values.
-        if ! [ -z $verbose_logging ]; then   
+        if ! [ -z $verbose_logging ]; then
             echo -e "\texecutable_directory is set to \"$executable_directory\""
             echo -e "\tsource_directories_string is set to \"$source_directories_string\""
             echo -e "\tclass_directory is set to \"$class_directory\""
@@ -341,7 +341,7 @@ function pre_clean {
     # If a jar file with the current name exists.
     if test -f "$executable_directory$executable_name"; then
         if ! [ -z $verbose_logging ]; then
-            echo -e "\tRemoving \"$executable_directory$executable_name\""; fi                    
+            echo -e "\tRemoving \"$executable_directory$executable_name\""; fi
         # Remove jar file.
         rm $executable_directory$executable_name; fi
     echo -e "Pre-Cleaning completed.\n"
@@ -388,9 +388,9 @@ function compile {
     # Package all class files together, pass the verbose flag if verbose logging is on.
     if ! [ -z $verbose_logging ]; then
         echo -e "Packaging code into \"$executable_directory$executable_name\""
-        jar cvfm $cwd$executable_directory$executable_name $cwd$config_directory$manifest_name */*.class 
+        jar cvfm $cwd$executable_directory$executable_name $cwd$config_directory$manifest_name */*.class
     else
-        jar cfm $cwd$executable_directory$executable_name $cwd$config_directory$manifest_name */*.class; fi                                                
+        jar cfm $cwd$executable_directory$executable_name $cwd$config_directory$manifest_name */*.class; fi
     # Return to the old directory, and build a launch shell script.
     cd $cwd
     echo -e "Compilation completed.\n"
@@ -458,7 +458,7 @@ while getopts " g:s:i:m:e:b:d:o:hrctv" opt; do
         g ) build_system $OPTARG ;;
         s ) config_directory="$OPTARG" ;;
         i ) config_name=$OPTARG ;;
-        m ) para_manifest_name="$OPTARG" ;;  
+        m ) para_manifest_name="$OPTARG" ;;
         e ) para_entry_name="$OPTARG"
             make_manifest="TRUE" ;;
         b ) para_creator_name="$OPTARG"
